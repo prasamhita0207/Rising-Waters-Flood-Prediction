@@ -1,0 +1,374 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body{
+    margin:0;
+    min-height:100vh;
+
+    background:
+        linear-gradient(rgba(5,18,35,.45), rgba(5,18,35,.55)),
+        url("../images/rain-bg.jpg");
+
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+    background-attachment:fixed;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    overflow-x:hidden;
+}
+
+/* =============================
+   LIVE BACKGROUND: Sky + Flood
+   ============================= */
+
+/* Sky gradient layer */
+body::before{
+
+    content:"";
+
+    position:fixed;
+
+    inset:0;
+
+    background:rgba(0,25,55,.35);
+
+    backdrop-filter:blur(2px);
+
+    z-index:0;
+
+}
+
+@keyframes stormShift {
+    0%   { filter: brightness(0.95) hue-rotate(0deg); }
+    50%  { filter: brightness(1.08) hue-rotate(4deg); }
+    100% { filter: brightness(0.88) hue-rotate(-3deg); }
+}
+
+/* Flood water at the bottom */
+body::after {
+    content: '';
+    position: fixed;
+    bottom: 0;
+    left: -10%;
+    width: 120%;
+    height: 30vh;
+    background: linear-gradient(
+        180deg,
+        rgba(30, 130, 190, 0.0) 0%,
+        rgba(30, 130, 190, 0.55) 30%,
+        rgba(10, 100, 160, 0.88) 100%
+    );
+    z-index: 1;
+    border-radius: 60% 60% 0 0 / 20px 20px 0 0;
+    animation: floodRise 6s ease-in-out infinite alternate;
+}
+
+@keyframes floodRise {
+    0%   { transform: translateY(0) scaleX(1); }
+    50%  { transform: translateY(-8px) scaleX(1.02); }
+    100% { transform: translateY(4px) scaleX(0.99); }
+}
+
+/* =============================
+   RAIN CANVAS (injected via JS)
+   ============================= */
+#rainCanvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* =============================
+   LIGHTNING FLASH (JS-driven every 5s)
+   ============================= */
+.lightning-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(255, 255, 255, 0);
+    z-index: 3;
+    pointer-events: none;
+    transition: background 0.05s ease;
+}
+
+/* =============================
+   FLOOD RIPPLES
+   ============================= */
+.ripple-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 30vh;
+    z-index: 4;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    border: 1.5px solid rgba(100, 200, 255, 0.35);
+    animation: rippleOut 3s ease-out infinite;
+    transform: scale(0);
+    opacity: 0;
+}
+
+@keyframes rippleOut {
+    0%   { transform: scale(0); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 0; }
+}
+
+/* =============================
+   CONTENT LAYER
+   ============================= */
+.container {
+    position: relative;
+    z-index: 10;
+    width: 95%;
+    max-width: 1150px;
+    background: rgba(255,255,255,0.18);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: 22px;
+    padding: 40px;
+    box-shadow: 0 20px 50px rgba(0,0,0,.35);
+}
+
+h1{
+    text-align:center;
+    color:white;
+    font-size:42px;
+    letter-spacing:1px;
+    text-shadow:0 5px 20px rgba(0,0,0,.35);
+    margin-bottom:10px;
+}
+
+h2{
+    text-align:center;
+    color:#eef8ff;
+    margin-bottom:30px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+input{
+    width:100%;
+    padding:15px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.35);
+    background:rgba(255,255,255,.92);
+    font-size:15px;
+    transition:.3s;
+}
+
+input:focus{
+    outline:none;
+    border-color:#00d4ff;
+    box-shadow:0 0 15px rgba(0,212,255,.45);
+}
+
+input:hover{
+    transform:translateY(-2px);
+}
+
+button{
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:12px;
+    font-size:18px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:.3s;
+}
+
+button:hover{
+    transform:translateY(-3px);
+    box-shadow:0 10px 25px rgba(0,0,0,.25);
+}
+
+button:disabled {
+    opacity: .7;
+    cursor: not-allowed;
+}
+
+.result h2 {
+    color: #0f172a;
+}
+
+.result h1 {
+    color: #00a651;
+    font-size: 50px;
+}
+
+.button-group {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.button-group button {
+    flex: 1;
+}
+
+#resetBtn{
+    background:#e63946;
+}
+
+#resetBtn:hover{
+    background:#c1121f;
+}
+
+.loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 25px;
+}
+
+.spinner {
+    width: 60px;
+    height: 60px;
+    border: 6px solid rgba(255, 255, 255, .3);
+    border-top: 6px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+}
+
+.loading p {
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+.result{
+    margin-top:35px;
+    background:white;
+    border-radius:20px;
+    padding:30px;
+    text-align:center;
+    animation:fadeIn .6s ease;
+    box-shadow:0 15px 35px rgba(0,0,0,.2);
+    transition:.3s;
+}
+
+.result:hover{
+    transform:translateY(-5px);
+}
+
+.success-text {
+    margin-top: 20px;
+    color: #16a34a;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+#predictionValue{
+    font-size:70px;
+    font-weight:bold;
+    margin-top:20px;
+}
+
+#predictionValue span {
+    display: block;
+    margin-top: 15px;
+    font-size: 26px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(25px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* =============================
+   Flood Safety Recommendation
+   ============================= */
+.advice-box {
+    margin-top: 25px;
+    background: #f8fafc;
+    border-radius: 15px;
+    padding: 20px;
+    text-align: left;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, .08);
+}
+
+.advice-box h3 {
+    color: #0f4c81;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+#adviceList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#adviceList li {
+    font-size: 18px;
+    padding: 10px 0;
+    border-bottom: 1px solid #e5e7eb;
+    color: #333;
+    line-height: 1.6;
+}
+
+#adviceList li:last-child {
+    border-bottom: none;
+}
+
+@media (max-width: 768px) {
+    .container  { padding: 20px; }
+    h1          { font-size: 32px; }
+    h2          { font-size: 20px; }
+    .button-group { flex-direction: column; }
+    #predictionValue { font-size: 40px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body::before, body::after, .lightning-overlay, .ripple {
+        animation: none;
+    }
+}
+
+.container{
+    animation:floatCard 5s ease-in-out infinite;
+}
+
+@keyframes floatCard{
+
+0%{
+transform:translateY(0px);
+}
+
+50%{
+transform:translateY(-5px);
+}
+
+100%{
+transform:translateY(0px);
+}
+
+}
